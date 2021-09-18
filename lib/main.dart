@@ -1,88 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/counterBloc.dart';
-import 'package:flutter_app/counterEvent.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:bike_tracking/controller/global.dart';
+import 'package:bike_tracking/view/home_page.dart';
+import 'package:bike_tracking/view/record_page.dart';
+import 'package:bike_tracking/view/settings_page.dart';
+import 'package:bike_tracking/view/tracking_page.dart';
 
-import 'UI/home.dart';
-
-void main() => runApp(ScaffoldExample());
-
-
+void main() async {
+  Global.init();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
+  void _getStoragePermission() async {
+    if (await Permission.storage.request().isGranted) {
+      Global.permissionGranted = true;
+    } else if (await Permission.storage.request().isPermanentlyDenied) {
+      await openAppSettings();
+    } else if (await Permission.storage.request().isDenied) {
+      Global.permissionGranted = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    Global.loadDataFromFile();
+    _getStoragePermission();
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: BottomNavigationController(),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class BottomNavigationController extends StatefulWidget {
+  //BottomNavigationController({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _BottomNavigationControllerState createState() =>
+      _BottomNavigationControllerState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final _bloc = CounterBloc();
+class _BottomNavigationControllerState
+    extends State<BottomNavigationController> {
+  //目前選擇頁索引值
+  int _currentIndex = 0; //預設值
+  final pages = [HomePage(), RecordPage(), SettingsPage()];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text('Bike Tracking'),
       ),
-      body: Center(
-        child: StreamBuilder(
-          stream: _bloc.counter,
-          initialData: 0,
-          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '${snapshot.data}',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            onPressed: () => _bloc.counterEventSink.add(IncrementEvent()),
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
-          SizedBox(width: 10),
-          FloatingActionButton(
-            onPressed: () => _bloc.counterEventSink.add(DecrementEvent()),
-            tooltip: 'Decrement',
-            child: Icon(Icons.remove),
-          ),
+      body: pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.assignment), label: 'Record'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
         ],
+        currentIndex: _currentIndex, //目前選擇頁索引值
+        fixedColor: Colors.blue, //選擇頁顏色
+        onTap: _onItemClick, //BottomNavigationBar 按下處理事件
       ),
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _bloc.dispose();
+  //BottomNavigationBar 按下處理事件，更新設定當下索引值
+  void _onItemClick(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
   }
 }
-
-

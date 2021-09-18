@@ -1,6 +1,6 @@
-# flutter_app
+# bike_tracking
 
-A new Flutter project.
+A tracking project.
 
 ## Getting Started
 
