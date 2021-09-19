@@ -21,7 +21,7 @@ class _TrackingPageState extends State<TrackingPage> {
   List<double>? _gyroscopeValues;
   List<double>? _magnetometerValues;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  final startTime = DateFormat('yyyy-MM-dd hh:mm:ss').format(DateTime.now());
+  final startTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
   late Timer _timer;
   late Trip thisTrip;
 
@@ -100,7 +100,7 @@ class _TrackingPageState extends State<TrackingPage> {
                   ),
                   onPressed: () {
                     _timer.cancel();
-                    thisTrip.endTime = DateFormat('yyyy-MM-dd hh:mm:ss')
+                    thisTrip.endTime = DateFormat('yyyy-MM-dd HH:mm:ss')
                         .format(DateTime.now());
                     Global.tripList.trip.add(thisTrip);
                     Global.dispose();
@@ -172,7 +172,7 @@ class _TrackingPageState extends State<TrackingPage> {
     _timer = Timer.periodic(
         Duration(seconds: Global.currentIntervalValue.round()), (timer) {
       Data data = new Data(
-          DateFormat('yyyy-MM-dd hh:mm:ss').format(DateTime.now()),
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
           _accelerometerValues!,
           _gyroscopeValues!,
           _userAccelerometerValues!,
